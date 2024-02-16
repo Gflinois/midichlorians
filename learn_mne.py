@@ -77,7 +77,7 @@ mne.viz.plot_compare_evokeds(
     show_sensors="upper right",
 )
 aud_evoked.plot_joint(picks="eeg")
-aud_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2], ch_type="eeg")
+aud_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2,0.3], ch_type="eeg")
 
 
 plt.show()
