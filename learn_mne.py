@@ -16,7 +16,7 @@ treated.load_data()
 
 
 #raw.compute_psd(fmax=50).plot(picks="data", exclude="bads")
-#raw.plot(duration=5, n_channels=30)
+#raw.plot(duration=10, n_channels=30)
 
 
 
@@ -43,10 +43,8 @@ event_dict = {
 events = mne.find_events(treated,stim_channel = "STI 014")
 
 
+fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
 
-fig = mne.viz.plot_events(
-    events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp
-)
 
 reject_criteria= dict(eeg = 150e-6)
 
@@ -67,6 +65,19 @@ vis_epochs = epochs["visual"]
 del raw, epochs  # free up memory
 
 
+#aud_epochs.plot_image(picks=["EEG 0"+str(i+1) for i in range(9,22)])
+
+
+aud_evoked = aud_epochs.average()
+vis_evoked = vis_epochs.average()
+
+mne.viz.plot_compare_evokeds(
+    dict(auditory=aud_evoked, visual=vis_evoked),
+    legend="upper left",
+    show_sensors="upper right",
+)
+aud_evoked.plot_joint(picks="eeg")
+aud_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2], ch_type="eeg")
 
 
 plt.show()
