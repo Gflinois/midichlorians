@@ -5,19 +5,21 @@ import pytorch_lightning
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
-	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=16, LSTM_LAYER=1, DROPSIZE=0,Numb_Of_Class=5):
+	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,frame_W=1000, DROPSIZE=0,Numb_Of_Class=5):
 		
 		#def parametres
 		nce = 22
-		self.LSTM_LAYER=LSTM_LAYER
-		self.N_NEURONE=N_NEURONE
-		self.h0c0=(torch.zeros ([LSTM_LAYER,Batchsize,N_NEURONE]),torch.zeros([LSTM_LAYER,Batchsize,N_NEURONE]))
+		CV_Wf=200
+		N_NEURONE = 8*Cv_Cout
 		
 		
 		#création d'un réseau 
 		super().__init__()
-		self.conv = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.lstm = torch.nn.LSTM(Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)#inputsize = Co*Conv_size_out,hiddensize = nb features to extract at each time ste (we will use the last time step's feature to predict the class),num of lstms, 
+		self.conv1 = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv2 = torch.nn.Conv2d(Cv_out,2*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv3 = torch.nn.Conv2d(2*Cv_out,4*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv4 = torch.nn.Conv2d(4*Cv_out,6*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv5 = torch.nn.Conv2d(6*Cv_out,8*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
 		self.drop = torch.nn.Dropout(DROPSIZE)
 		self.Big = torch.nn.Linear( N_NEURONE,  N_NEURONE//2)
 		self.drop1 = torch.nn.Dropout(DROPSIZE)
@@ -31,19 +33,23 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 	def forward(self,data):
+		data = data[:,:-4,:] if len(data.size())>=3 else data[:-4,:]
 		batchsize = data.size()[0]  if len(data.size())>=3 else 1
 		nb_of_time = data.size()[1] if len(data.size())>=3 else data.size()[0]
 		nce = data.size()[2]        if len(data.size())>=3 else data.size()[1]
 		data = torch.reshape(data,[batchsize,1,nce,nb_of_time])
-		c = self.conv(data)
-		r = torch.nn.functional.relu(c)
-		r = torch.reshape(c,[batchsize,c.size()[3],c.size()[1]])
-		#r = torch.reshape(c,[c.size()[3],c.size()[1]])
-		l,mem = self.lstm(r,self.h0c0)
-		s = l[:,-1,:]
-		t = torch.reshape(s,[batchsize,s.size()[1]])
-		m = torch.nn.functional.relu(t)
-		b = torch.nn.functional.relu(self.drop(self.Big(m)))
+		c1 = self.conv1(data)
+		r1 = torch.nn.functional.relu(c1)
+		c2 = self.conv2(r1)
+		r2 = torch.nn.functional.relu(c2)
+		c3 = self.conv3(r2)
+		r3 = torch.nn.functional.relu(c3)
+		c4 = self.conv4(r3)
+		r4 = torch.nn.functional.relu(c4)
+		c5 = self.conv5(r4)
+		r5 = torch.nn.functional.relu(c5)
+		print(r5.size())
+		b = torch.nn.functional.relu(self.drop(self.Big(r5)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
 		result = 2*torch.sigmoid(f)-1
