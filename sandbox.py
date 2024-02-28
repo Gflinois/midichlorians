@@ -15,7 +15,9 @@ nnc2=neur_net_struct()
 
 dd = DataInRam(CLA=True,PathToFiles="./data_MI")
 d1 = dd["CLA"][0]["data"]
+"""
 print(nnc2l(d1).size())
 dlim=d1[:1000,:]
 print(dlim.size())
 print(nnc2(dlim).size())
+"""
