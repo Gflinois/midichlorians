@@ -1,8 +1,9 @@
 import os
 import torch
 from scipy.io import loadmat
+import numpy as np
 
-def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.'):
+def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',prebatching=True):
 	l = os.listdir(PathToFiles)
 
 	for nf in l :
@@ -11,20 +12,61 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.'):
 			load = loadmat(fpath)
 			load = load['o'][0][0]
 			
-			marker = torch.nn.functional.one_hot(torch.LongTensor(load[4]),num_classes=7) 
 			
-			data = torch.FloatTensor(load[5])
+			markers = torch.LongTensor(load[4])
+			datas = torch.FloatTensor(load[5])
 			testname = nf[3:]
 			
-			print(marker.size())
+			
+			if prebatching :
+				for j in range(4):
+					idx = np.where(markers == j)[0]
+					i=0
+					while i<len(idx)-1 :
+						start = idx[i]
+						while idx[i]+1==idx[i+1] and i<len(idx)-2:
+							i+=1
+						end = idx[i]
+						marker = torch.nn.functional.one_hot(markers[start],num_classes=4) 
+						local_datas = datas[start:start+200]
+						try: 
+							CLA_data_list
+						except NameError:CLA_data_list=[]
+						CLA_data_list.append({"marker":marker, "data":local_datas, "testname":testname})
+						i+=1
+						
+						 
+					
+					
+
+
+				
+			
+			else :
+				#excluding uninteresting data to be able to onehot it
+				for j in [99,92,91,90] :
+					idx = np.where(markers == j)[0]
+					#print("will remove ",len(idx)," values for ",j)
+					markers = np.delete(markers,idx,0)
+					datas = np.delete(datas,idx,0)
+					#print("removed values for ",j)
+				
+				marker = torch.nn.functional.one_hot(marker,num_classes=4)
+				
+				try: 
+					CLA_data_list
+				except NameError:CLA_data_list=[]
+				CLA_data_list.append({"marker":markers, "data":datas, "testname":testname})
 			
 			
-			try: 
-				CLA_data_list
-			except NameError:CLA_data_list=[]
-			CLA_data_list.append({"marker":marker, "data":data, "testname":testname})
+				
+				
+				
+				
+				
 			print("loaded : ",fpath)
-			break
+			
+
 		if HaLT & (nf[:4]=='HaLT'):
 			print(nf)
 		if fiveF & (nf[:2]=='5F'):
