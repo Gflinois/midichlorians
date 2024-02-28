@@ -11,7 +11,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		nce = 22
 		self.LSTM_LAYER=LSTM_LAYER
 		self.N_NEURONE=N_NEURONE
-		self.h0c0=(torch.zeros ([LSTM_LAYER,Batchsize,N_NEURONE]),torch.zeros([LSTM_LAYER,Batchsize,N_NEURONE]))
+		#self.h0c0=(torch.zeros ([LSTM_LAYER,Batchsize,N_NEURONE]),torch.zeros([LSTM_LAYER,Batchsize,N_NEURONE]))
 		
 		
 		#création d'un réseau 
@@ -36,7 +36,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		r = torch.nn.functional.relu(c)
 		r = torch.reshape(c,[batchsize,c.size()[3],c.size()[1]])
 		#r = torch.reshape(c,[c.size()[3],c.size()[1]])
-		l,mem = self.lstm(r,self.h0c0)
+		l,mem = self.lstm(r)
 		s = l[:,-1,:]
 		t = torch.reshape(s,[batchsize,s.size()[1]])
 		m = torch.nn.functional.relu(t)
