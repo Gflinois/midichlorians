@@ -11,7 +11,7 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.'):
 			load = loadmat(fpath)
 			load = load['o'][0][0]
 			
-			marker = torch.nn.functional.one_hot(torch.LongTensor(load[4]),num_classes=6) 
+			marker = torch.nn.functional.one_hot(torch.LongTensor(load[4]),num_classes=7) 
 			
 			data = torch.FloatTensor(load[5])
 			testname = nf[3:]
@@ -24,6 +24,7 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.'):
 			except NameError:CLA_data_list=[]
 			CLA_data_list.append({"marker":marker, "data":data, "testname":testname})
 			print("loaded : ",fpath)
+			break
 		if HaLT & (nf[:4]=='HaLT'):
 			print(nf)
 		if fiveF & (nf[:2]=='5F'):
