@@ -1,5 +1,5 @@
 import sys
-import numpy
+import numpy as np
 
 sys.path.insert(1,"./NN")
 sys.path.insert(2,"./data_MI")
@@ -24,6 +24,12 @@ print(nnc2(dlim).size())
 
 
 m1 = dd["CLA"][0]["marker"]
+
+
+
+
+
+"""
 n=0
 lh=0
 rh=0
@@ -53,7 +59,6 @@ while m1[i][0][3]:
 	i+=1
 
 length = i-start
-		
 print("length of a O = ",length)		
 
-
+"""
