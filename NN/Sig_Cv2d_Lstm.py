@@ -26,9 +26,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 		
-		self.reset()
-		
-		
 		
 	def forward(self,data):
 		batchsize = data.size()[0]  if len(data.size())>=3 else 1
@@ -50,8 +47,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		return result
 
 
-	def reset(self):
-		selfmemory = torch.zeros([self.LSTM_LAYER,14,self.N_NEURONE])
+	
 
 
 	def configure_optimizers(self):
