@@ -20,7 +20,7 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',precutting=True
 			
 			
 			if precutting :
-				for j in range(4):
+				for j in range(1,4):
 					idx = np.where(markers == j)[0]
 					i=0
 					while i<len(idx)-1 :
@@ -74,8 +74,12 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',precutting=True
 			np.random.shuffle(CLA_data_list)
 			Train = CLA_data_list[ : len(CLA_data_list)*9//10]
 			Val = CLA_data_list[len(CLA_data_list)*9//10 : ]
-			
-			dataset_train=torch.utils.data.DataLoader(Train,batch_size=100,shuffle=True)
+			if torch.cuda.is_available():
+				for i in range(len(Train)):
+					Train[i] = (Train[i][0].cuda(),Train[i][1].cuda())
+				for i in range(len(Val)):
+					Val[i] = (Val[i][0].cuda(),Val[i][1].cuda())
+			dataset_train=torch.utils.data.DataLoader(Train,batch_size=500,shuffle=True)
 			dataset_val=torch.utils.data.DataLoader(Val,batch_size=100,shuffle=True)
 			dataset_test=torch.utils.data.DataLoader(Val,batch_size=1,shuffle=True)
 			

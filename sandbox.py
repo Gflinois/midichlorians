@@ -10,7 +10,8 @@ sys.path.insert(1,"./NN")
 sys.path.insert(2,"./data_MI")
 
 
-from Sig_Cv2d_Lstm import neur_net_struct
+import Sig_Cv2d_Lstm
+import Snap_Cv2d
 from DataInRam import DataInRam
 from translator import translator
 
@@ -34,13 +35,8 @@ class MetricsCallback(pytorch_lightning.Callback):
 
 
 
-
-
-
-
-
-nnc2l=neur_net_struct()
-nnc2=neur_net_struct()
+nnc2l=Sig_Cv2d_Lstm.neur_net_struct()
+nnc2=Snap_Cv2d.neur_net_struct()
 
 
 
@@ -60,6 +56,9 @@ print(len(Train)," training batches")
 
 
 #this is the training
+
+model = nnc2
+
 try :
 	shutil.rmtree("lightning_logs")
 except FileNotFoundError :
@@ -69,17 +68,26 @@ checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_l
 
 trainer = pytorch_lightning.Trainer(
 	logger=True,
-	max_epochs=2,
+	max_epochs=20,
 	devices=1, accelerator="auto",
 	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 	)
 
-trainer.fit(nnc2l,Train, Val)
+trainer.fit(model,Train, Val)
 
-nnc2l.eval()
-s=nnc2l.test_loop(Test)
 
-print(nnc2l.pred_table)
+fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
+
+shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
+
+model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
+
+
+
+model.eval()
+s=model.test_loop(Test)
+
+print(model.pred_table)
 
 
 """

@@ -5,21 +5,21 @@ import pytorch_lightning
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
-	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,frame_W=1000, DROPSIZE=0,Numb_Of_Class=5):
+	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,frame_W=200, DROPSIZE=0,Numb_Of_Class=4):
 		
 		#def parametres
 		nce = 22
-		CV_Wf=200
+		CV_Wf=frame_W//5
 		N_NEURONE = 8*Cv_Cout
-		
+		self.noc = Numb_Of_Class
 		
 		#création d'un réseau 
 		super().__init__()
 		self.conv1 = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.conv2 = torch.nn.Conv2d(Cv_out,2*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.conv3 = torch.nn.Conv2d(2*Cv_out,4*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.conv4 = torch.nn.Conv2d(4*Cv_out,6*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.conv5 = torch.nn.Conv2d(6*Cv_out,8*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv2 = torch.nn.Conv2d(Cv_Cout,2*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv3 = torch.nn.Conv2d(2*Cv_Cout,4*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv4 = torch.nn.Conv2d(4*Cv_Cout,6*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
+		self.conv5 = torch.nn.Conv2d(6*Cv_Cout,8*Cv_Cout, (1,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
 		self.drop = torch.nn.Dropout(DROPSIZE)
 		self.Big = torch.nn.Linear( N_NEURONE,  N_NEURONE//2)
 		self.drop1 = torch.nn.Dropout(DROPSIZE)
@@ -27,8 +27,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		self.Fin = torch.nn.Linear(N_NEURONE//4, Numb_Of_Class)
 		
 		
-		
-		self.reset()
 		
 		
 		
@@ -48,16 +46,12 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		r4 = torch.nn.functional.relu(c4)
 		c5 = self.conv5(r4)
 		r5 = torch.nn.functional.relu(c5)
-		print(r5.size())
+		r5 = torch.reshape(r5,[batchsize,r5.size()[1]])
 		b = torch.nn.functional.relu(self.drop(self.Big(r5)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
 		result = 2*torch.sigmoid(f)-1
 		return result
-
-
-	def reset(self):
-		selfmemory = torch.zeros([self.LSTM_LAYER,14,self.N_NEURONE])
 
 
 	def configure_optimizers(self):
@@ -96,7 +90,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		size = len(dataloader.dataset)
 		num_batches = len(dataloader)
 		test_loss, correct = 0, 0
-		self.pred_table=torch.zeros(5,5)
+		self.pred_table=torch.zeros(self.noc,self.noc)
 		
 		with torch.no_grad():
 			for X, y in dataloader:
@@ -105,9 +99,9 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 				test_loss += torch.nn.functional.mse_loss(pred, y).item()
 				correct += int(pred.argmax()== y.argmax())
 				self.pred_table[y.argmax()][pred.argmax()]+=1
-		for i in range(5):
+		for i in range(self.noc):
 			ti=sum(self.pred_table[i])
-			for j in range(5):
+			for j in range(self.noc):
 				self.pred_table[i][j]=self.pred_table[i][j].item()*100//ti.item() if ti!=0 else  0 
 
 		test_loss /= size
