@@ -5,12 +5,13 @@ import pytorch_lightning
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
-	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=16, LSTM_LAYER=1, DROPSIZE=0,Numb_Of_Class=5):
+	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=16, LSTM_LAYER=1, DROPSIZE=0,Numb_Of_Class=4):
 		
 		#def parametres
 		nce = 22
 		self.LSTM_LAYER=LSTM_LAYER
 		self.N_NEURONE=N_NEURONE
+		self.noc = Numb_Of_Class
 		#self.h0c0=(torch.zeros ([LSTM_LAYER,Batchsize,N_NEURONE]),torch.zeros([LSTM_LAYER,Batchsize,N_NEURONE]))
 		
 		
@@ -86,7 +87,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		size = len(dataloader.dataset)
 		num_batches = len(dataloader)
 		test_loss, correct = 0, 0
-		self.pred_table=torch.zeros(5,5)
+		self.pred_table=torch.zeros(self.noc,self.noc)
 		
 		with torch.no_grad():
 			for X, y in dataloader:
@@ -95,9 +96,9 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 				test_loss += torch.nn.functional.mse_loss(pred, y).item()
 				correct += int(pred.argmax()== y.argmax())
 				self.pred_table[y.argmax()][pred.argmax()]+=1
-		for i in range(5):
+		for i in range(self.noc):
 			ti=sum(self.pred_table[i])
-			for j in range(5):
+			for j in range(self.noc):
 				self.pred_table[i][j]=self.pred_table[i][j].item()*100//ti.item() if ti!=0 else  0 
 
 		test_loss /= size

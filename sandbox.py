@@ -1,6 +1,11 @@
 import sys
+if not sys.warnoptions:
+    import os, warnings
+    warnings.simplefilter("ignore")
 import numpy as np
-
+import shutil
+import pytorch_lightning
+import torch
 sys.path.insert(1,"./NN")
 sys.path.insert(2,"./data_MI")
 
@@ -10,20 +15,71 @@ from DataInRam import DataInRam
 from translator import translator
 
 
+
+import sys
+if not sys.warnoptions:
+    import os, warnings
+    warnings.simplefilter("ignore")
+
+
+
+class MetricsCallback(pytorch_lightning.Callback):
+	def __init__(self):
+		super().__init__()
+		self.metrics = []
+
+	def on_validation_end(self, trainer, pl_module):
+		self.metrics.append(trainer.callback_metrics)
+
+
+
+
+
+
+
+
+
 nnc2l=neur_net_struct()
 nnc2=neur_net_struct()
+
+
+
 
 
 #this is for datatype = Dataloader
 
 
 dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader")
-Train = cla0 = dd["CLA"]["Train"]
-Val = cla0 = dd["CLA"]["Validation"]
-print(len(Val))
-print(len(Train))
+Train = dd["CLA"]["Train"]
+Val = dd["CLA"]["Validation"]
+Test = dd["CLA"]["Test"]
+print(len(Val)," validation batches")
+print(len(Train)," training batches")
 
 
+
+
+#this is the training
+try :
+	shutil.rmtree("lightning_logs")
+except FileNotFoundError :
+	print("File not suppressed")
+
+checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
+
+trainer = pytorch_lightning.Trainer(
+	logger=True,
+	max_epochs=2,
+	devices=1, accelerator="auto",
+	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
+	)
+
+trainer.fit(nnc2l,Train, Val)
+
+nnc2l.eval()
+s=nnc2l.test_loop(Test)
+
+print(nnc2l.pred_table)
 
 
 """

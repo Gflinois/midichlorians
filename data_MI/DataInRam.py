@@ -3,6 +3,7 @@ import torch
 from scipy.io import loadmat
 import numpy as np
 
+
 def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',precutting=True,datatype="dico"):
 	l = os.listdir(PathToFiles)
 
@@ -76,8 +77,9 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',precutting=True
 			
 			dataset_train=torch.utils.data.DataLoader(Train,batch_size=100,shuffle=True)
 			dataset_val=torch.utils.data.DataLoader(Val,batch_size=100,shuffle=True)
+			dataset_test=torch.utils.data.DataLoader(Val,batch_size=1,shuffle=True)
 			
-			CLA_data = {"Train" : dataset_train,"Validation":dataset_val}
+			CLA_data = {"Train" : dataset_train,"Validation":dataset_val,"Test":dataset_test}
 		if HaLT:
 			print("pas pret")
 		if fiveF:
