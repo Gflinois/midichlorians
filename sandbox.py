@@ -13,23 +13,56 @@ from translator import translator
 nnc2l=neur_net_struct()
 nnc2=neur_net_struct()
 
+
+#this is for datatype = Dataloader
+
+
+dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader")
+Train = cla0 = dd["CLA"]["Train"]
+Val = cla0 = dd["CLA"]["Validation"]
+print(len(Val))
+print(len(Train))
+
+
+
+
+"""
+#this is for datatype = tuple
+
+dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="tuple")
+
+cla0 = dd["CLA"][0]
+d1 = cla0[0]
+m1 = cla0[1]
+
+print(len(dd["CLA"]))
+print(m1.size())
+print(d1.size())
+"""
+
+
+
+
+
+"""
+#this is for datatype = dico
 dd = DataInRam(CLA=True,PathToFiles="./data_MI")
-d1 = dd["CLA"][0]["data"]
+
+cla0 = dd["CLA"][0]
+d1 = cla0["data"]
+m1 = cla0["marker"]
+
+print(len(dd["CLA"]))
+print(m1.size())
+print(d1.size())
+"""
+
 """
 print(nnc2l(d1).size())
 dlim=d1[:1000,:]
 print(dlim.size())
 print(nnc2(dlim).size())
-"""
 
-
-m1 = dd["CLA"][0]["marker"]
-
-
-
-
-
-"""
 n=0
 lh=0
 rh=0
