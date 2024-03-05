@@ -57,7 +57,7 @@ print(len(Train)," training batches")
 
 #this is the training
 
-model = nnc2
+model = nnc2l
 
 try :
 	shutil.rmtree("lightning_logs")
@@ -68,7 +68,7 @@ checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_l
 
 trainer = pytorch_lightning.Trainer(
 	logger=True,
-	max_epochs=20,
+	max_epochs=30,
 	devices=1, accelerator="auto",
 	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 	)
@@ -80,8 +80,9 @@ fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
 
 shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 
-model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
+#model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
 
+model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
 
 
 model.eval()
