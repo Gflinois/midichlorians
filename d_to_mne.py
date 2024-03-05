@@ -59,7 +59,7 @@ raw.add_events(events)
 treated = raw.copy()
 treated.load_data()
 
-filt_passhaut = mne.filter.create_filter(data[:22], sfreq,1,None)
+filt_passhaut = mne.filter.create_filter(data[:22], sfreq,0.1,None)
 
 filt_coupebande = mne.filter.create_filter(data[:22], sfreq,70,40)
 
@@ -74,4 +74,29 @@ treated.compute_psd(fmax=50,picks="eeg").plot(picks="eeg",exclude="bads")
 ica = mne.preprocessing.ICA(n_components=4, random_state=97, max_iter=800)
 ica.fit(raw,picks="eeg")
 ica.apply(treated)
+
+
+event_dict = {
+    "nothing": 0,
+    "LH": 1,
+    "RH": 2,
+    "O": 3
+}
+
+fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
+
+reject_criteria= dict(eeg = 150e-6)
+
+epochs = mne.Epochs(
+    treated,
+    events,
+    event_id=event_dict,
+    tmin=-0.2,
+    tmax=0.8,
+    #reject=reject_criteria,
+    preload=True,
+)
+
+fig = epochs.plot()
+
 
