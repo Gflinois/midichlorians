@@ -20,7 +20,7 @@ def DataInRam(CLA=False,HaLT=False,fiveF=False,PathToFiles = '.',precutting=True
 			
 			
 			if precutting :
-				for j in range(1,4):
+				for j in range(4):
 					idx = np.where(markers == j)[0]
 					i=0
 					while i<len(idx)-1 :
