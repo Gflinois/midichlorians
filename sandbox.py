@@ -35,8 +35,8 @@ class MetricsCallback(pytorch_lightning.Callback):
 
 
 
-nnc2l=Sig_Cv2d_Lstm.neur_net_struct()
-nnc2=Snap_Cv2d.neur_net_struct()
+nnc2l=Sig_Cv2d_Lstm.neur_net_struct(Batchsize=500)
+nnc2=Snap_Cv2d.neur_net_struct(Batchsize=500)
 
 
 
@@ -57,7 +57,7 @@ print(len(Train)," training batches")
 
 #this is the training
 
-model = nnc2
+model = nnc2l
 
 try :
 	shutil.rmtree("lightning_logs")
@@ -83,7 +83,6 @@ shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 if model == nnc2:
 	model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
 if model == nnc2l :
-	print("worked")
 	model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
 
 
