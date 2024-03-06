@@ -8,7 +8,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,frame_W=200, DROPSIZE=0,Numb_Of_Class=4):
 		
 		#def parametres
-		nce = 22
+		nce = 23
 		CV_Wf=frame_W//5
 		N_NEURONE = 8*Cv_Cout
 		self.noc = Numb_Of_Class

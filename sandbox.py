@@ -57,7 +57,7 @@ print(len(Train)," training batches")
 
 #this is the training
 
-model = nnc2l
+model = nnc2
 
 try :
 	shutil.rmtree("lightning_logs")
