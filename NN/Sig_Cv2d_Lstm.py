@@ -18,7 +18,8 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		#création d'un réseau 
 		super().__init__()
 		self.conv = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
-		self.lstm = torch.nn.LSTM(1, N_NEURONE, LSTM_LAYER, batch_first=True)#inputsize = Co*Conv_size_out,hiddensize = nb features to extract at each time ste (we will use the last time step's feature to predict the class),num of lstms, 
+		self.lstm = torch.nn.LSTM(Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)#inputsize = Co*Conv_size_out,hiddensize = nb features to extract at each time ste (we will use the last time step's feature to predict the class),num of lstms, 
+		self.Temp = torch.nn.Linear(200, N_NEURONE)
 		self.drop = torch.nn.Dropout(DROPSIZE)
 		self.Big = torch.nn.Linear( N_NEURONE,  N_NEURONE//2)
 		self.drop1 = torch.nn.Dropout(DROPSIZE)
@@ -29,20 +30,18 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 	def forward(self,data):
-		print(data.shape)
 		batchsize = data.shape[0]  if len(data.shape)>=3 else 1
 		nb_of_time = data.shape[1] if len(data.shape)>=3 else data.shape[0]
 		nce = data.shape[2]        if len(data.shape)>=3 else data.shape[1]
 		data = torch.reshape(data,[batchsize,1,nce,nb_of_time])
 		c = self.conv(data)
 		r = torch.nn.functional.relu(c)
-		data = torch.reshape(data,[batchsize,data.size()[3],data.size()[1]])
-		print(data.shape)
-		#r = torch.reshape(c,[c.size()[3],c.size()[1]])
-		l,mem = self.lstm(data)
+		r = torch.reshape(c,[batchsize,c.shape[3],c.shape[1]])
+		l,mem = self.lstm(r)
 		s = l[:,-1,:]
-		t = torch.reshape(s,[batchsize,s.size()[1]])
+		t = torch.reshape(s,[batchsize,s.shape[1]])
 		m = torch.nn.functional.relu(t)
+		m = self.Temp(data)
 		b = torch.nn.functional.relu(self.drop(self.Big(m)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
