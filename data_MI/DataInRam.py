@@ -9,7 +9,8 @@ from translator import electrodes
 
 def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=True, MNE=False, datatype="dico"):
 	l = os.listdir(PathToFiles)
-	nce = 23
+	nce = 1
+	min_c =22
 	
 	
 	
@@ -126,20 +127,20 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				if datatype == "tuple" or datatype == "Dataloader":
 					marker = torch.nn.functional.one_hot(torch.LongTensor([2]),num_classes=4)
 					for  d in RH_d:
-						local_datas = torch.FloatTensor(d[:nce,:200]).reshape([200,nce])
+						local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					marker = torch.nn.functional.one_hot(torch.LongTensor([1]),num_classes=4)
 					for  d in LH_d:
-						local_datas = local_datas = torch.FloatTensor(d[:nce,:200]).reshape([200,nce])
+						local_datas = local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					if O:
 						marker = torch.nn.functional.one_hot(torch.LongTensor([3]),num_classes=4)
 						for  d in O_d:
-							local_datas = torch.FloatTensor(d[:nce,:200]).reshape([200,nce])
+							local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
 							CLA_data_list.append((local_datas,marker))
 					marker = torch.nn.functional.one_hot(torch.LongTensor([0]),num_classes=4)
 					for  d in nothing_d:
-						local_data = torch.FloatTensor(d[:nce,:200]).reshape([200,nce])
+						local_data = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					
 			else :
@@ -179,7 +180,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				for i in range(len(Val)):
 					Val[i] = (Val[i][0].cuda(),Val[i][1].cuda())
 			dataset_train=torch.utils.data.DataLoader(Train,batch_size=500,shuffle=True)
-			dataset_val=torch.utils.data.DataLoader(Val,batch_size=100,shuffle=True)
+			dataset_val=torch.utils.data.DataLoader(Val,batch_size=500,shuffle=True)
 			dataset_test=torch.utils.data.DataLoader(Val,batch_size=1,shuffle=True)
 			
 			CLA_data = {"Train" : dataset_train,"Validation":dataset_val,"Test":dataset_test}
