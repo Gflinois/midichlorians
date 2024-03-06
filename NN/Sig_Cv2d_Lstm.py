@@ -19,7 +19,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		super().__init__()
 		self.conv = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,CV_Wf)) #Cin,Co,(Hf=nce,Wf)
 		self.lstm = torch.nn.LSTM(Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)#inputsize = Co*Conv_size_out,hiddensize = nb features to extract at each time ste (we will use the last time step's feature to predict the class),num of lstms, 
-		self.Temp = torch.nn.Linear(200, N_NEURONE)
 		self.drop = torch.nn.Dropout(DROPSIZE)
 		self.Big = torch.nn.Linear( N_NEURONE,  N_NEURONE//2)
 		self.drop1 = torch.nn.Dropout(DROPSIZE)
@@ -41,7 +40,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		s = l[:,-1,:]
 		t = torch.reshape(s,[batchsize,s.shape[1]])
 		m = torch.nn.functional.relu(t)
-		m = self.Temp(data)
 		b = torch.nn.functional.relu(self.drop(self.Big(m)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
