@@ -57,7 +57,7 @@ print(len(Train)," training batches")
 
 #this is the training
 
-model = nnc2
+model = nnc2l
 
 try :
 	shutil.rmtree("lightning_logs")
@@ -80,9 +80,11 @@ fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
 
 shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 
-model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
-
-#model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
+if model == nnc2:
+	model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
+if model == nnc2l :
+	print("worked")
+	model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
 
 
 model.eval()
