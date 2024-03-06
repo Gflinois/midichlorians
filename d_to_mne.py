@@ -67,7 +67,7 @@ filt_coupebande = mne.filter.create_filter(data[:22], sfreq,70,40)
 
 
 
-treated.compute_psd(fmax=50,picks="eeg").plot(picks="eeg",exclude="bads")
+treated.compute_psd(fmax=50,picks="eeg")#.plot(picks="eeg",exclude="bads")
 
 
 
@@ -83,7 +83,7 @@ event_dict = {
     "O": 3
 }
 
-fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
+#fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
 
 reject_criteria= dict(eeg = 150e-6)
 
@@ -97,6 +97,30 @@ epochs = mne.Epochs(
     preload=True,
 )
 
-fig = epochs.plot()
+#fig = epochs.plot()
+#fig.show()
+LH_epochs = epochs["LH"]
+RH_epochs = epochs["RH"]
+O_epochs = epochs["O"]
+nothing_epochs = epochs["nothing"]
 
+
+LH_evoked = LH_epochs.average()
+RH_evoked = RH_epochs.average()
+O_evoked = O_epochs.average()
+nothing_evoked = nothing_epochs.average()
+
+
+#mne.viz.plot_compare_evokeds(
+#    dict(LH=LH_evoked, RH=RH_evoked,O=O_evoked, nothing=nothing_evoked),
+#    legend="upper left",
+#    show_sensors="upper right",
+#)
+
+
+
+RH_d = RH_epochs.get_data(copy=True)
+LH_d = LH_epochs.get_data(copy=True)
+O_d = O_epochs.get_data(copy=True)
+nothing_d = nothing_epochs.get_data(copy=True)
 

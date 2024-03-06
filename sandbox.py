@@ -45,7 +45,7 @@ nnc2=Snap_Cv2d.neur_net_struct()
 #this is for datatype = Dataloader
 
 
-dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader")
+dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True)
 Train = dd["CLA"]["Train"]
 Val = dd["CLA"]["Validation"]
 Test = dd["CLA"]["Test"]
@@ -57,7 +57,7 @@ print(len(Train)," training batches")
 
 #this is the training
 
-model = nnc2l
+model = nnc2
 
 try :
 	shutil.rmtree("lightning_logs")
@@ -80,9 +80,9 @@ fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
 
 shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 
-#model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
+model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
 
-model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
+#model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
 
 
 model.eval()
