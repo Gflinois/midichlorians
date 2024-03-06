@@ -34,7 +34,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		nce = data.size()[2]        if len(data.size())>=3 else data.size()[1]
 		data = torch.reshape(data,[batchsize,1,nce,nb_of_time])
 		c = self.conv(data)
-		r = torch.nn.functional.relu(c)
+		#r = torch.nn.functional.relu(c)
 		r = torch.reshape(c,[batchsize,c.size()[3],c.size()[1]])
 		#r = torch.reshape(c,[c.size()[3],c.size()[1]])
 		l,mem = self.lstm(r)
