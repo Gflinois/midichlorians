@@ -180,8 +180,8 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 					Train[i] = (Train[i][0].cuda(),Train[i][1].cuda())
 				for i in range(len(Val)):
 					Val[i] = (Val[i][0].cuda(),Val[i][1].cuda())
-			dataset_train=torch.utils.data.DataLoader(Train,batch_size=50,shuffle=False)
-			dataset_val=torch.utils.data.DataLoader(Val,batch_size=50,shuffle=False)
+			dataset_train=torch.utils.data.DataLoader(Train,batch_size=500,shuffle=False)
+			dataset_val=torch.utils.data.DataLoader(Val,batch_size=500,shuffle=False)
 			dataset_test=torch.utils.data.DataLoader(Val,batch_size=1,shuffle=False)
 			
 			CLA_data = {"Train" : dataset_train,"Validation":dataset_val,"Test":dataset_test}
