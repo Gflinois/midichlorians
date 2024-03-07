@@ -26,15 +26,17 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		self.Fin = torch.nn.Linear(N_NEURONE//4, Numb_Of_Class)
 		
 		
+		self.conv = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,4))
+		self.testl = torch.nn.LSTM(Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)
+		self.test1 = torch.nn.Linear(N_NEURONE, N_NEURONE//2)
+		self.test2 = torch.nn.Linear(N_NEURONE//2, N_NEURONE//4)
+		self.test3 = torch.nn.Linear(N_NEURONE//4, Numb_Of_Class)
+		
+		
 		
 		
 	def forward(self,data):
-		"""
-		result1 = torch.zeros(data.shape[0],1,4).cuda()
-		for j in range(len(data[:,40,0])):
-			i = data[j,40,0]
-			result1[j] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
-		"""
+		
 		batchsize = data.shape[0]  if len(data.shape)>=3 else 1
 		nb_of_time = data.shape[1] if len(data.shape)>=3 else data.shape[0]
 		nce = data.shape[2]        if len(data.shape)>=3 else data.shape[1]
@@ -49,10 +51,27 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		b = torch.nn.functional.relu(self.drop(self.Big(m)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
+		
+		
+		
+		###
+		data = torch.reshape(data[:,0,0,40],[batchsize,1])
+		result1 = torch.zeros(data.shape[0],1,1,4).cuda()
+		for j in range(len(data[:,0])):
+			i = data[j,0]
+			result1[j,0] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
+			
+		
+		c = self.conv(result1)
+		c = torch.reshape(c,[c.shape[0],1,c.shape[1]])
+		fl,mem = self.testl(c)
+		f1 = self.test1(fl)
+		f2 = self.test2(f1)
+		f = self.test3(f2)
+		###
+		
 		result = 2*torch.sigmoid(f)-1
-		#print(result.argmax() == result1.argmax())
 		return result
-
 
 	
 
