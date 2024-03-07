@@ -53,6 +53,8 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		b = torch.nn.functional.relu(self.drop(self.Big(m)))
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
+		"""
+		
 		
 		
 		data = torch.reshape(data,[batchsize,data.shape[3]])
@@ -68,18 +70,19 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		fl,mem = self.testl(c)
 		#print(fl.shape)
 		fs = fl[:,-1,:]
-		#print(fs.shape)
-		f1 = self.test1(fl)
+		fs = torch.reshape(fs,[fl.shape[0],1,fl.shape[2]])
+		f1 = self.test1(fs)
 		f2 = self.test2(f1)
 		f = self.test3(f2)
 		###
 		
 		result = 2*torch.sigmoid(f)-1
 		return result
-		"""
+		
 		
 		
 		###
+		"""
 		data = torch.reshape(data[:,0,0,40],[batchsize,1])
 		result1 = torch.zeros(data.shape[0],1,1,4).cuda()
 		for j in range(len(data[:,0])):
@@ -97,10 +100,9 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		f2 = self.test2(f1)
 		f = self.test3(f2)
 		###
-		
 		result = 2*torch.sigmoid(f)-1
 		return result
-
+		"""
 	
 
 
