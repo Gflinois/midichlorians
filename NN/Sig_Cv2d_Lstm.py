@@ -97,11 +97,14 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		with torch.no_grad():
 			for X, y in dataloader:
-				
+				result1 = torch.zeros(X.shape[0],1,4).cuda()
+				for j in range(len(X[:,40,0])):
+					i = X[j,40,0]
+					result1[j] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
 				pred = self(X)
 				test_loss += torch.nn.functional.mse_loss(pred, y).item()
-				correct += int(pred.argmax()== y.argmax())
-				self.pred_table[y.argmax()][pred.argmax()]+=1
+				correct += int(result1.argmax()== y.argmax())
+				self.pred_table[y.argmax()][result1.argmax()]+=1
 		for i in range(self.noc):
 			ti=sum(self.pred_table[i])
 			for j in range(self.noc):
