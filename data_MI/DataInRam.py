@@ -88,6 +88,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				try :
 					event_dict = {"nothing": 0, "LH": 1, "RH": 2, "O": 3}
 					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.8, preload=True)
+					epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
 					O_epochs = epochs["O"]
 					O_d = O_epochs.get_data(copy=True)
 					O=True
