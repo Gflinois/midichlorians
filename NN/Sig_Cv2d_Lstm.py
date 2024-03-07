@@ -29,6 +29,12 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 	def forward(self,data):
+		"""
+		result1 = torch.zeros(data.shape[0],1,4).cuda()
+		for j in range(len(data[:,40,0])):
+			i = data[j,40,0]
+			result1[j] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
+		"""
 		batchsize = data.shape[0]  if len(data.shape)>=3 else 1
 		nb_of_time = data.shape[1] if len(data.shape)>=3 else data.shape[0]
 		nce = data.shape[2]        if len(data.shape)>=3 else data.shape[1]
@@ -44,6 +50,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		i = torch.nn.functional.relu(self.drop1(self.Inter(b)))
 		f = self.Fin(i)
 		result = 2*torch.sigmoid(f)-1
+		#print(result.argmax() == result1.argmax())
 		return result
 
 
