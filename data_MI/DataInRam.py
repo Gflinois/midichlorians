@@ -9,8 +9,8 @@ from translator import electrodes
 
 def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=True, MNE=False, datatype="dico"):
 	l = os.listdir(PathToFiles)
-	nce = 1
-	min_c =22
+	nce = 22
+	min_c =0
 	
 	
 	

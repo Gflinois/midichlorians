@@ -8,7 +8,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=16, LSTM_LAYER=1, DROPSIZE=0,Numb_Of_Class=4):
 		
 		#def parametres
-		nce = 1
+		nce = 22
 		self.LSTM_LAYER=LSTM_LAYER
 		self.N_NEURONE=N_NEURONE
 		self.noc = Numb_Of_Class
@@ -26,12 +26,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		self.Fin = torch.nn.Linear(N_NEURONE//4, Numb_Of_Class)
 		
 		
-		self.conv = torch.nn.Conv2d(Cv_Cin,Cv_Cout, (nce,4))
-		self.testl = torch.nn.LSTM(Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)
-		self.test1 = torch.nn.Linear(N_NEURONE, N_NEURONE//2)
-		self.test2 = torch.nn.Linear(N_NEURONE//2, N_NEURONE//4)
-		self.test3 = torch.nn.Linear(N_NEURONE//4, Numb_Of_Class)
-		
 		
 		
 		
@@ -43,7 +37,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		data = torch.reshape(data,[batchsize,1,nce,nb_of_time])
 		"""
 		
-		c = self.conv(data)
+		
 		r = torch.nn.functional.relu(c)
 		r = torch.reshape(c,[batchsize,c.shape[3],c.shape[1]])
 		l,mem = self.lstm(r)
@@ -65,6 +59,8 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 			for k in range(len(data[j])):
 				i = data[j,k]
 				result1[j,0,k] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
+		c = self.conv(result1)
+		c = torch.reshape(c,[c.shape[0],c.shape[2],c.shape[1]])
 		"""	
 		
 	
@@ -76,10 +72,13 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		for j in range(len(data[:,0])):
 			i = data[j,0]
 			result1[j,0] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
-		"""	
-		
 		c = self.conv(result1)
 		c = torch.reshape(c,[c.shape[0],c.shape[2],c.shape[1]])
+		"""	
+		
+		
+		c = self.conv(data)
+		c = torch.reshape(c,[c.shape[0],c.shape[3],c.shape[1]])
 		l,mem = self.lstm(c)
 		s = l[:,-1,:]
 		t = torch.reshape(s,[l.shape[0],1,l.shape[2]])
@@ -134,10 +133,12 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		with torch.no_grad():
 			for X, y in dataloader:
+				"""
 				result1 = torch.zeros(X.shape[0],1,4).cuda()
 				for j in range(len(X[:,40,0])):
 					i = X[j,40,0]
 					result1[j] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
+				"""
 				pred = self(X)
 				test_loss += torch.nn.functional.mse_loss(pred, y).item()
 				correct += int(pred.argmax()== y.argmax())
