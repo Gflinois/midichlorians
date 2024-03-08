@@ -57,49 +57,37 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 		"""
+		### magic data to prove the ai can learn with noise
+		
 		data = torch.reshape(data,[batchsize,data.shape[3]])
 		result1 = torch.zeros(data.shape[0],1,data.shape[1],4).cuda()
 		for j in range(len(data)):
 			for k in range(len(data[j])):
 				i = data[j,k]
 				result1[j,0,k] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
-			
+		"""	
 		
-		c = self.conv(result1)
-		c = torch.reshape(c,[c.shape[0],200,c.shape[1]])
-		fl,mem = self.testl(c)
-		#print(fl.shape)
-		fs = fl[:,-1,:]
-		fs = torch.reshape(fs,[fl.shape[0],1,fl.shape[2]])
-		f1 = self.test1(fs)
-		i = self.test2(f1)
-		f = self.Fin(i)
-		###
-		
-		result = 2*torch.sigmoid(f)-1
-		return result
-		
+	
 		"""
-		
-		###
+		### magic data to prove the ai can learn
 		
 		data = torch.reshape(data[:,0,0,40],[batchsize,1])
 		result1 = torch.zeros(data.shape[0],1,1,4).cuda()
 		for j in range(len(data[:,0])):
 			i = data[j,0]
 			result1[j,0] = (torch.nn.functional.one_hot(torch.LongTensor([int(i)]),num_classes=4)).cuda()
-			
+		"""	
 		
 		c = self.conv(result1)
-		c = torch.reshape(c,[c.shape[0],1,c.shape[1]])
+		c = torch.reshape(c,[c.shape[0],c.shape[2],c.shape[1]])
 		l,mem = self.lstm(c)
 		s = l[:,-1,:]
-		t = torch.reshape(s,l.shape)
+		t = torch.reshape(s,[l.shape[0],1,l.shape[2]])
 		m = torch.nn.functional.relu(t)
 		b = self.Big(m)
 		i = self.Inter(b)
 		f = self.Fin(i)
-		###
+		
 		result = 2*torch.sigmoid(f)-1
 		return result
 		
