@@ -51,12 +51,12 @@ print(len(Train)," training batches")
 
 
 
-for mult in range(1,6):
-	nomb_neur = 16 * mult
-	for lstm_layer in range(1,5):
-		model_name = "model"+str(nomb_neur)+str(lstm_layer)+".ckpt"
-		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(Batchsize=500,N_NEURONE = nomb_neur,LSTM_LAYER = lstm_layer)
-		nnc2=Snap_Cv2d.neur_net_struct(Batchsize=500)
+for m1 in range(3,6):
+	drp = m1/10
+	for m2 in range(1,5):
+		wf = (m2*2)+3
+		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(DROPSIZE = drp,CV_Wf = wf)
+		nnc2=Snap_Cv2d.neur_net_struct()
 
 
 
@@ -87,19 +87,18 @@ for mult in range(1,6):
 
 		fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
 
-		shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, model_name)
+		shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 		
 		if model == nnc2:
-			model= Snap_Cv2d.neur_net_struct.load_from_checkpoint(model_name)
+			model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
 		if model == nnc2l :
-			model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint(model_name,N_NEURONE = nomb_neur,LSTM_LAYER = lstm_layer)
-			#model= model.load_from_checkpoint(model_name)
+			model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",DROPSIZE = drp,CV_Wf = wf)
 		
 
 		model.eval()
 		s=model.test_loop(Test)
 
-		print("pred table for nombre neuronnes = ",nomb_neur," and nombre lstm layer = ",lstm_layer,"\n",model.pred_table)
+		print("pred table for Dropsize = ",drp," and CV wf = ",wf,"\n",model.pred_table)
 
 
 """

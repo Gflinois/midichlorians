@@ -5,7 +5,7 @@ import pytorch_lightning
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
-	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=16, LSTM_LAYER=1, DROPSIZE=0,Numb_Of_Class=4):
+	def __init__(self,Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, N_NEURONE=32, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4):
 	#def __init__(self, N_NEURONE, LSTM_LAYER, Batchsize=1, Cv_Cin=1,Cv_Cout=12,CV_Wf=3, DROPSIZE=0,Numb_Of_Class=4):
 		
 		#def parametres
