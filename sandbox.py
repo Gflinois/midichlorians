@@ -33,15 +33,6 @@ class MetricsCallback(pytorch_lightning.Callback):
 		self.metrics.append(trainer.callback_metrics)
 
 
-
-
-nnc2l=Sig_Cv2d_Lstm.neur_net_struct(Batchsize=500)
-nnc2=Snap_Cv2d.neur_net_struct(Batchsize=500)
-
-
-
-
-
 #this is for datatype = Dataloader
 
 
@@ -55,41 +46,60 @@ print(len(Train)," training batches")
 
 
 
-#this is the training
-
-model = nnc2l
-
-try :
-	shutil.rmtree("lightning_logs")
-except FileNotFoundError :
-	print("File not suppressed")
-
-checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
-
-trainer = pytorch_lightning.Trainer(
-	logger=True,
-	max_epochs=30,
-	devices=1, accelerator="auto",
-	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
-	)
-
-trainer.fit(model,Train, Val)
 
 
-fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
-
-shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
-
-if model == nnc2:
-	model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
-if model == nnc2l :
-	model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt")
 
 
-model.eval()
-s=model.test_loop(Test)
 
-print(model.pred_table)
+for mult in range(1,6):
+	nomb_neur = 16 * mult
+	for lstm_layer in range(1,5):
+		model_name = "model"+str(nomb_neur)+str(lstm_layer)+".ckpt"
+		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(Batchsize=500,N_NEURONE = nomb_neur,LSTM_LAYER = lstm_layer)
+		nnc2=Snap_Cv2d.neur_net_struct(Batchsize=500)
+
+
+
+
+
+
+
+		#this is the training
+
+		model = nnc2l
+
+		try :
+			shutil.rmtree("lightning_logs")
+		except FileNotFoundError :
+			print("File not suppressed")
+
+		checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
+
+		trainer = pytorch_lightning.Trainer(
+			logger=True,
+			max_epochs=30,
+			devices=1, accelerator="auto",
+			callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
+			)
+
+		trainer.fit(model,Train, Val)
+
+
+		fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
+
+		shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, model_name)
+		
+		if model == nnc2:
+			model= Snap_Cv2d.neur_net_struct.load_from_checkpoint(model_name)
+		if model == nnc2l :
+			model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint(model_name,N_NEURONE = nomb_neur,LSTM_LAYER = lstm_layer)
+			#model= model.load_from_checkpoint(model_name)
+		
+
+		model.eval()
+		s=model.test_loop(Test)
+
+		print("pred table for nombre neuronnes = ",nomb_neur," and nombre lstm layer = ",lstm_layer,"\n",model.pred_table)
 
 
 """
