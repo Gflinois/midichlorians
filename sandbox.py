@@ -34,9 +34,9 @@ class MetricsCallback(pytorch_lightning.Callback):
 
 
 #this is for datatype = Dataloader
+l_chan =(True,[5,6])
 
-
-dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True)
+dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True,l_chan=l_chan)
 Train = dd["CLA"]["Train"]
 Val = dd["CLA"]["Validation"]
 Test = dd["CLA"]["Test"]
@@ -51,11 +51,11 @@ print(len(Train)," training batches")
 
 
 
-for m1 in range(3,6):
+for m1 in range(4,5):
 	drp = m1/10
-	for m2 in range(1,5):
+	for m2 in range(3,4):
 		wf = (m2*2)+3
-		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(DROPSIZE = drp,CV_Wf = wf)
+		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(DROPSIZE = drp,CV_Wf = wf,nce = len(l_chan[1]))
 		nnc2=Snap_Cv2d.neur_net_struct()
 
 
@@ -92,7 +92,7 @@ for m1 in range(3,6):
 		if model == nnc2:
 			model= Snap_Cv2d.neur_net_struct.load_from_checkpoint("model.ckpt")
 		if model == nnc2l :
-			model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",DROPSIZE = drp,CV_Wf = wf)
+			model= Sig_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",DROPSIZE = drp,CV_Wf = wf,nce = len(l_chan[1]))
 		
 
 		model.eval()

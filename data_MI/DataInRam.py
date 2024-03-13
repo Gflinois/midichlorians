@@ -7,12 +7,11 @@ sys.path.insert(2,"./data_MI")
 from translator import electrodes
 
 
-def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=True, MNE=False, datatype="dico"):
+def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=True, MNE=False, datatype="dico",l_chan = (False,range(22))):
 	l = os.listdir(PathToFiles)
-	nce = 22
-	min_c =0
-	
-	
+	nce = len(l_chan[1])
+
+
 	
 	
 	for nf in l :
@@ -128,20 +127,20 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				if datatype == "tuple" or datatype == "Dataloader":
 					marker = torch.nn.functional.one_hot(torch.LongTensor([2]),num_classes=4)
 					for  d in RH_d:
-						local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
+						local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					marker = torch.nn.functional.one_hot(torch.LongTensor([1]),num_classes=4)
 					for  d in LH_d:
-						local_datas = local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
+						local_datas = local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					if O:
 						marker = torch.nn.functional.one_hot(torch.LongTensor([3]),num_classes=4)
 						for  d in O_d:
-							local_datas = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
+							local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
 							CLA_data_list.append((local_datas,marker))
 					marker = torch.nn.functional.one_hot(torch.LongTensor([0]),num_classes=4)
 					for  d in nothing_d:
-						local_data = torch.FloatTensor(d[min_c:min_c+nce,:200]).reshape([200,nce])
+						local_data = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
 						CLA_data_list.append((local_datas,marker))
 					
 			else :
@@ -180,7 +179,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 					Train[i] = (Train[i][0].cuda(),Train[i][1].cuda())
 				for i in range(len(Val)):
 					Val[i] = (Val[i][0].cuda(),Val[i][1].cuda())
-			dataset_train=torch.utils.data.DataLoader(Train,batch_size=50,shuffle=False)
+			dataset_train=torch.utils.data.DataLoader(Train,batch_size=500,shuffle=False)
 			dataset_val=torch.utils.data.DataLoader(Val,batch_size=50,shuffle=False)
 			dataset_test=torch.utils.data.DataLoader(Val,batch_size=1,shuffle=False)
 			
