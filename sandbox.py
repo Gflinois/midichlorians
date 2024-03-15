@@ -34,7 +34,7 @@ class MetricsCallback(pytorch_lightning.Callback):
 
 
 #this is for datatype = Dataloader
-l_chan =(True,[5,6])
+l_chan =(True,range(22))
 
 dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True,l_chan=l_chan)
 Train = dd["CLA"]["Train"]
@@ -53,8 +53,8 @@ print(len(Train)," training batches")
 
 for m1 in range(4,5):
 	drp = m1/10
-	for m2 in range(3,4):
-		wf = (m2*2)+3
+	for m2 in range(4,5):
+		wf = (m2*2)+4
 		nnc2l=Sig_Cv2d_Lstm.neur_net_struct(DROPSIZE = drp,CV_Wf = wf,nce = len(l_chan[1]))
 		nnc2=Snap_Cv2d.neur_net_struct()
 
@@ -77,7 +77,7 @@ for m1 in range(4,5):
 
 		trainer = pytorch_lightning.Trainer(
 			logger=True,
-			max_epochs=30,
+			max_epochs=100,
 			devices=1, accelerator="auto",
 			callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 			)
