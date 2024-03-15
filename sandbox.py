@@ -6,6 +6,7 @@ import numpy as np
 import shutil
 import pytorch_lightning
 import torch
+import mne
 sys.path.insert(1,"./NN")
 sys.path.insert(2,"./data_MI")
 
@@ -33,6 +34,36 @@ class MetricsCallback(pytorch_lightning.Callback):
 		self.metrics.append(trainer.callback_metrics)
 
 
+
+
+l_chan =(True,range(22))
+"""
+epochs = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="", precutting=False, MNE=True, l_chan=l_chan)
+e = epochs["CLA"]
+#epochs = mne.concatenate_epochs(e)
+epochs = e[0]
+a = mne.time_frequency.tfr_morlet(epochs,[15,30],[1,1])
+LH_epochs = epochs["LH"]
+RH_epochs = epochs["RH"]
+nothing_epochs = epochs["nothing"]
+#
+LH_evoked = LH_epochs.average()
+RH_evoked = RH_epochs.average()
+nothing_evoked = nothing_epochs.average()
+#
+mne.viz.plot_compare_evokeds(
+dict(LH=LH_evoked, RH=RH_evoked,nothing=nothing_evoked),
+legend="upper left",
+show_sensors="upper right",
+)
+
+"""
+
+"""
+LH_evoked.plot_joint(picks="eeg")
+LH_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2,0.3], ch_type="eeg")
+
+"""
 #this is for datatype = Dataloader
 l_chan =(True,range(22))
 
@@ -46,10 +77,7 @@ print(len(Train)," training batches")
 
 
 
-
-
-
-
+# this is for training test
 
 for m1 in range(4,5):
 	drp = m1/10

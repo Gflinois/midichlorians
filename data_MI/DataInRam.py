@@ -36,7 +36,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 							i+=1
 						end = idx[i]
 						marker = torch.nn.functional.one_hot(markers[start],num_classes=4) 
-						local_datas = datas[start:start+200]
+						local_datas = datas[start:start+npts]
 						try: 
 							CLA_data_list
 						except NameError:CLA_data_list=[]
@@ -46,7 +46,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 							CLA_data_list.append((local_datas,marker))
 						i+=1
 						
-			elif precutting and MNE :
+			elif MNE :
 				datas = datas.reshape([datas.shape[1],datas.shape[0]])
 				datas = np.pad(datas, [(0, 1), (0, 0)], mode='constant')
 				ch_names = list(electrodes.keys())[:datas.shape[0]-1]
@@ -76,8 +76,8 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				raw.add_events(events)
 				treated = raw.copy()
 				treated.load_data()
-				filt_passhaut = mne.filter.create_filter(datas[:nce], sfreq,0.1,None)
-				filt_coupebande = mne.filter.create_filter(datas[:nce], sfreq,90,50)
+				filt_passhaut = mne.filter.create_filter(datas[:nce], sfreq,15,None)
+				filt_coupebande = mne.filter.create_filter(datas[:nce], sfreq,90,30)
 
 				treated.compute_psd(fmax=50,picks="eeg")#.plot(picks="eeg",exclude="bads")
 
@@ -86,19 +86,20 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				ica.apply(treated)
 				try :
 					event_dict = {"nothing": 0, "LH": 1, "RH": 2, "O": 3}
-					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.8, preload=True)
+					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
+					npts = int(0.6*200)
 					epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
 					O_epochs = epochs["O"]
 					O_d = O_epochs.get_data(copy=True)
 					O=True
 				except:
 					event_dict = {"nothing": 0, "LH": 1, "RH": 2}
-					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.8, preload=True)
+					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
+					npts = int(0.6*200)
 					O=False
 				LH_epochs = epochs["LH"]
 				RH_epochs = epochs["RH"]
 				nothing_epochs = epochs["nothing"]
-
 				RH_d = RH_epochs.get_data(copy=True)
 				LH_d = LH_epochs.get_data(copy=True)
 				nothing_d = nothing_epochs.get_data(copy=True)
@@ -106,7 +107,10 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 					CLA_data_list
 				except NameError:CLA_data_list=[]
 				
-				if datatype == "dico":
+				if not precutting : 
+					CLA_data_list.append(epochs)
+				
+				elif datatype == "dico":
 					marker = torch.nn.functional.one_hot(torch.LongTensor([2]),num_classes=4)
 					for  d in RH_d:
 						CLA_data_list.append({"marker":marker, "data":local_datas, "testname":testname})
@@ -124,23 +128,24 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 						local_datas = torch.FloatTensor(d[:nce])
 						CLA_data_list.append({"marker":marker, "data":local_datas, "testname":testname})
 						
-				if datatype == "tuple" or datatype == "Dataloader":
+				elif datatype == "tuple" or datatype == "Dataloader":
 					marker = torch.nn.functional.one_hot(torch.LongTensor([2]),num_classes=4)
 					for  d in RH_d:
-						local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
+						local_datas = torch.FloatTensor(d[l_chan[1],:npts]).reshape([npts,nce])
 						CLA_data_list.append((local_datas,marker))
+
 					marker = torch.nn.functional.one_hot(torch.LongTensor([1]),num_classes=4)
 					for  d in LH_d:
-						local_datas = local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
+						local_datas = torch.FloatTensor(d[l_chan[1],:npts]).reshape([npts,nce])
 						CLA_data_list.append((local_datas,marker))
 					if O:
 						marker = torch.nn.functional.one_hot(torch.LongTensor([3]),num_classes=4)
 						for  d in O_d:
-							local_datas = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
+							local_datas = torch.FloatTensor(d[l_chan[1],:npts]).reshape([npts,nce])
 							CLA_data_list.append((local_datas,marker))
 					marker = torch.nn.functional.one_hot(torch.LongTensor([0]),num_classes=4)
 					for  d in nothing_d:
-						local_data = torch.FloatTensor(d[l_chan[1],:200]).reshape([200,nce])
+						local_data = torch.FloatTensor(d[l_chan[1],:npts]).reshape([npts,nce])
 						CLA_data_list.append((local_datas,marker))
 					
 			else :
