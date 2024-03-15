@@ -17,8 +17,8 @@ treated.load_data()
 
 #raw.compute_psd(fmax=50).plot(picks="data", exclude="bads")
 #raw.plot(duration=10, n_channels=30)
-print(treated.info)
-stop
+#print(treated.info)
+
 
 ica = mne.preprocessing.ICA(n_components=20, random_state=97, max_iter=800)
 ica.fit(raw)
@@ -43,9 +43,9 @@ event_dict = {
 events = mne.find_events(treated,stim_channel = "STI 014")
 
 
-fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
+#fig = mne.viz.plot_events(events, event_id=event_dict, sfreq=raw.info["sfreq"], first_samp=raw.first_samp)
 
-stop
+
 reject_criteria= dict(eeg = 150e-6)
 
 epochs = mne.Epochs(
