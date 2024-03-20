@@ -21,7 +21,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 			load = load['o'][0][0]
 			
 			markers = load[4]
-			datas = load[5]
+			datas = load[5] * 10**(-6)
 			testname = nf[3:]
 			if not MNE :
 				markers = torch.LongTensor(markers)
@@ -63,31 +63,44 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 					idx = np.where(markers == j)[0]
 					i=0
 					while i<len(idx)-1 :
-						start = idx[i]
+						if j == 0:
+							start = idx[i+200]
+						else:
+							start = idx[i-30]
 						while idx[i]+1==idx[i+1] and i<len(idx)-2:
 							i+=1
 						end = idx[i]
+						#print("j = ",j,"start = ",start,"end = ",end)
 						events.append([start, 0,j])
 						i+=1
 				events = sorted(events, key=lambda event: event[0])
-
+				
+				#filt_passhaut = mne.filter.create_filter(datas[:nce], sfreq,15,None)
+				#filt_coupebande = mne.filter.create_filter(datas[:nce], sfreq,90,30)
+				#datas = np.convolve(datas,filt_passhaut)
+				
+				
 				raw = mne.io.RawArray(data = datas,info = info)
 				raw.set_channel_types(ch_types)
 				raw.add_events(events)
 				treated = raw.copy()
 				treated.load_data()
-				filt_passhaut = mne.filter.create_filter(datas[:nce], sfreq,15,None)
-				filt_coupebande = mne.filter.create_filter(datas[:nce], sfreq,90,30)
+				treated.filter(1,None) #highpass
+				#treated.filter(90,30)#notch
+				#treated.filter(None,30)#lowpass
+				
 
 				treated.compute_psd(fmax=50,picks="eeg")#.plot(picks="eeg",exclude="bads")
 
 				ica = mne.preprocessing.ICA(n_components=4, random_state=97, max_iter=800)
 				ica.fit(raw,picks="eeg")
+				
 				ica.apply(treated)
+				
 				try :
 					event_dict = {"nothing": 0, "LH": 1, "RH": 2, "O": 3}
 					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
-					npts = int(0.6*200)
+					npts = int(0.6*sfreq)
 					epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
 					O_epochs = epochs["O"]
 					O_d = O_epochs.get_data(copy=True)
@@ -95,7 +108,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				except:
 					event_dict = {"nothing": 0, "LH": 1, "RH": 2}
 					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
-					npts = int(0.6*200)
+					npts = int(0.6*sfreq)
 					O=False
 				LH_epochs = epochs["LH"]
 				RH_epochs = epochs["RH"]
@@ -103,6 +116,19 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				RH_d = RH_epochs.get_data(copy=True)
 				LH_d = LH_epochs.get_data(copy=True)
 				nothing_d = nothing_epochs.get_data(copy=True)
+				
+				
+				#debugging#################################################################################
+				lh = LH_epochs.average()
+				n = nothing_epochs.average()
+				diff = mne.combine_evoked((lh,-n),weights="equal")
+				mne.viz.plot_events(events, event_id=event_dict, sfreq=sfreq)
+				lh.plot()
+				n.plot()
+				diff.plot()
+				dd["LH"].plot_psd() ==  dd["nothing"].plot_psd()
+				###########################################################################################
+				return 
 				try: 
 					CLA_data_list
 				except NameError:CLA_data_list=[]
@@ -172,7 +198,6 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 			print(nf)
 		if fiveF & (nf[:2]=='5F'):
 			print(nf)
-	
 	
 	if datatype == "Dataloader" :
 		if CLA:
