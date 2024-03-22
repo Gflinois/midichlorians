@@ -71,7 +71,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 							i+=1
 						end = idx[i]
 						#print("j = ",j,"start = ",start,"end = ",end)
-						events.append([start, 0,j])
+						events.append([start, 0,j+1])
 						i+=1
 				events = sorted(events, key=lambda event: event[0])
 				
@@ -83,6 +83,9 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				raw = mne.io.RawArray(data = datas,info = info)
 				raw.set_channel_types(ch_types)
 				raw.add_events(events)
+				
+				return raw
+				
 				treated = raw.copy()
 				treated.load_data()
 				treated.filter(1,None) #highpass
@@ -98,15 +101,14 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				ica.apply(treated)
 				
 				try :
-					event_dict = {"nothing": 0, "LH": 1, "RH": 2, "O": 3}
-					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
+					event_dict = {"nothing": 1, "LH": 2, "RH": 3, "O": 4}
 					npts = int(0.6*sfreq)
 					epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
 					O_epochs = epochs["O"]
 					O_d = O_epochs.get_data(copy=True)
 					O=True
 				except:
-					event_dict = {"nothing": 0, "LH": 1, "RH": 2}
+					event_dict = {"nothing": 1, "LH": 2, "RH": 3}
 					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
 					npts = int(0.6*sfreq)
 					O=False
