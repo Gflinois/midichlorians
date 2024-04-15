@@ -90,7 +90,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				treated.load_data()
 				treated.filter(1,None) #highpass
 				#treated.filter(90,30)#notch
-				#treated.filter(None,30)#lowpass
+				treated.filter(None,30)#lowpass
 				
 
 				treated.compute_psd(fmax=50,picks="eeg")#.plot(picks="eeg",exclude="bads")

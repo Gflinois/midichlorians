@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 sys.path.insert(2,"./data_MI")
 from DataInRam import DataInRam 
 
-"""
 sample_data_folder = mne.datasets.sample.data_path()
 sample_data_raw_file = (
     sample_data_folder / "MEG" / "sample" / "sample_audvis_filt-0-40_raw.fif"
@@ -13,7 +12,7 @@ raw = mne.io.read_raw_fif(sample_data_raw_file)
 """
 l_chan =(True,range(22))#for the test
 raw = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True,l_chan=l_chan)#for the test
-
+"""
 treated = raw.copy()
 treated.load_data()
 #raw.info is amazing
@@ -39,7 +38,6 @@ chan_idxs = raw.ch_names
 #treated.plot(order = chan_idxs,start=12,duration=4)
 treated.plot(start=12,duration=4)
 
-"""
 event_dict = {
     "auditory/left": 1,
     "auditory/right": 2,
@@ -48,9 +46,9 @@ event_dict = {
     "smiley": 5,
     "buttonpress": 32,
 }
-"""
 
-event_dict = {"nothing": 1, "LH": 2, "RH": 3, "O": 4}#for the test
+
+#event_dict = {"nothing": 1, "LH": 2, "RH": 3, "O": 4}#for the test
 
 
 events = mne.find_events(treated,stim_channel = "STI 014") 
@@ -72,16 +70,17 @@ epochs = mne.Epochs(
     preload=True,
 )
 
-"""
+
 epochs.equalize_event_counts(["auditory/left", "auditory/right", "visual/left", "visual/right"]) 
 aud_epochs = epochs["auditory"]
 vis_epochs = epochs["visual"]
 del raw, epochs  # free up memory
+
 """
 epochs.equalize_event_counts(event_dict.keys()) #for the test
 aud_epochs = epochs["LH"]#for the test
 vis_epochs = epochs["O"]#for the test
-
+"""
 
 
 #aud_epochs.plot_image(picks=["EEG 0"+str(i+1) for i in range(9,22)])
