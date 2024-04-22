@@ -74,7 +74,8 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 						events.append([start, 0,j+1])
 						i+=1
 				events = sorted(events, key=lambda event: event[0])
-				
+				Ws = mne.time_frequency.morlet(sfreq, range(1,36))#generating the ws based on morlet for cwt for freqs of 1-35Hz
+				treated = mne.time_frequency.tfr.cwt(datas, Ws)
 				#filt_passhaut = mne.filter.create_filter(datas[:nce], sfreq,15,None)
 				#filt_coupebande = mne.filter.create_filter(datas[:nce], sfreq,90,30)
 				#datas = np.convolve(datas,filt_passhaut)
@@ -84,24 +85,24 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				raw.set_channel_types(ch_types)
 				raw.add_events(events)
 				
-				return raw
-				
+				"""
 				treated = raw.copy()
 				treated.load_data()
-				treated.filter(1,None) #highpass
+				#treated.filter(1,None) #highpass
 				#treated.filter(90,30)#notch
-				treated.filter(None,30)#lowpass
+				#treated.filter(None,30)#lowpass
 				
-
-				treated.compute_psd(fmax=50,picks="eeg")#.plot(picks="eeg",exclude="bads")
+				
+				treated.compute_psd(fmax=50,picks="eeg") #.plot(picks="eeg",exclude="bads")
 
 				ica = mne.preprocessing.ICA(n_components=4, random_state=97, max_iter=800)
 				ica.fit(raw,picks="eeg")
 				
 				ica.apply(treated)
-				
+				"""
 				try :
 					event_dict = {"nothing": 1, "LH": 2, "RH": 3, "O": 4}
+					epochs = mne.Epochs(raw, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
 					npts = int(0.6*sfreq)
 					epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
 					O_epochs = epochs["O"]
@@ -109,7 +110,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 					O=True
 				except:
 					event_dict = {"nothing": 1, "LH": 2, "RH": 3}
-					epochs = mne.Epochs(treated, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
+					epochs = mne.Epochs(raw, events, event_id=event_dict, tmin=-0.2, tmax=0.4, preload=True)
 					npts = int(0.6*sfreq)
 					O=False
 				LH_epochs = epochs["LH"]
@@ -120,7 +121,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				nothing_d = nothing_epochs.get_data(copy=True)
 				
 				
-				#debugging#################################################################################
+				"""	#debugging#################################################################################
 				lh = LH_epochs.average()
 				n = nothing_epochs.average()
 				diff = mne.combine_evoked((lh,-n),weights="equal")
@@ -130,7 +131,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 				diff.plot()
 				dd["LH"].plot_psd() ==  dd["nothing"].plot_psd()
 				###########################################################################################
-				return 
+				"""
 				try: 
 					CLA_data_list
 				except NameError:CLA_data_list=[]
@@ -238,5 +239,5 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.', precutting=
 
 
 if __name__ == '__main__':
-	dd=DataInRam(CLA =True)
-	print(dd["CLA"])
+	dd=DataInRam(CLA =True,precutting = False, MNE=True, datatype="Dataloader",PathToFiles = './data_MI')
+	print(dd)
