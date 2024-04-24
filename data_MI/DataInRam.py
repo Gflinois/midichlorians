@@ -12,6 +12,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.'):
 	lmark = ["ng","LH","RH","_O"]
 	nce = 22
 	npts = 200
+	freqs = 35
 	CLA_data_list = []
 	for nf in l :
 		string_marker = nf[-6:-4]
@@ -19,6 +20,7 @@ def DataInRam(CLA=False, HaLT=False, fiveF=False, PathToFiles = '.'):
 		marker = torch.nn.functional.one_hot(marker,num_classes=4)
 		d_l = np.load(PathToFiles+'/npy/'+nf,allow_pickle=True)
 		for d in d_l:
+			print(d.shape)
 			local_datas = torch.FloatTensor(d[range(nce),:npts]).reshape([npts,nce])
 			CLA_data_list.append((local_datas,marker))
 	if CLA:

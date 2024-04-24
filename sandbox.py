@@ -13,6 +13,7 @@ sys.path.insert(2,"./data_MI")
 
 import Sig_Cv2d_Lstm
 import Snap_Cv2d
+import cwt_Cv2d_Lstm
 from DataInRam import DataInRam
 from translator import translator
 
@@ -64,10 +65,10 @@ LH_evoked.plot_joint(picks="eeg")
 LH_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2,0.3], ch_type="eeg")
 
 """
-#this is for datatype = Dataloader
-l_chan =(True,range(22))
+#make use of the new data loader of dataloaders
 
-dd = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="Dataloader",MNE=True,l_chan=l_chan)
+
+dd=DataInRam(CLA =True,PathToFiles = './data_MI')
 Train = dd["CLA"]["Train"]
 Val = dd["CLA"]["Validation"]
 Test = dd["CLA"]["Test"]
@@ -76,8 +77,24 @@ print(len(Train)," training batches")
 
 
 
+#training with the new nn
+model = nncwt = cwt_Cv2d_Lstm.neur_net_struct(Batchsize=1, freqs=35,Cv_Cout=44,CV_Wf=3, N_NEURONE=600, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=22)
 
 
+try :
+	shutil.rmtree("lightning_logs")
+except FileNotFoundError :
+	print("File not suppressed")
+checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
+trainer = pytorch_lightning.Trainer(
+	logger=True,
+	max_epochs=100,
+	devices=1, accelerator="auto",
+	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
+	)
+trainer.fit(model,Train, Val)
+
+'''
 # this is for training test
 
 for m1 in range(4,5):
@@ -129,7 +146,7 @@ for m1 in range(4,5):
 
 		print("pred table for Dropsize = ",drp," and CV wf = ",wf,"\n",model.pred_table)
 
-
+'''
 """
 #this is for datatype = tuple
 
