@@ -88,11 +88,21 @@ except FileNotFoundError :
 checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
 trainer = pytorch_lightning.Trainer(
 	logger=True,
-	max_epochs=100,
+	max_epochs=20,
 	devices=1, accelerator="auto",
 	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 	)
 trainer.fit(model,Train, Val)
+
+
+fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
+shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
+
+
+model= cwt_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",Batchsize=1, freqs=35,Cv_Cout=44,CV_Wf=3, N_NEURONE=600, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=22)
+
+model.eval()
+s=model.test_loop(Test)
 
 '''
 # this is for training test

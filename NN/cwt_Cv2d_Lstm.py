@@ -19,8 +19,8 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		self.conv1 = torch.nn.Conv2d(nce,Cv_Cout, (freqs//5+1,CV_Wf)) #Hout = freqs-(freqs//5+1)+1 = 35-8+1 = 28
 		self.conv2 = torch.nn.Conv2d(Cv_Cout,2*Cv_Cout, (freqs//5+1,CV_Wf)) #Hout = freqs-2*(freqs//5+1)+2 = 35-16+2 = 21
-		self.conv3 = torch.nn.Conv2d(2*Cv_Cout,4*Cv_Cout, (freqs//5,CV_Wf)) #Hout = freqs-3*(freqs//5+1)+3 = 35-24+3 = 14
-		self.conv4 = torch.nn.Conv2d(4*Cv_Cout,6*Cv_Cout, (freqs//5,CV_Wf)) #Hout = freqs-4*(freqs//5+1)+4 = 35-32+4 = 7
+		self.conv3 = torch.nn.Conv2d(2*Cv_Cout,4*Cv_Cout, (freqs//5+1,CV_Wf)) #Hout = freqs-3*(freqs//5+1)+3 = 35-24+3 = 14
+		self.conv4 = torch.nn.Conv2d(4*Cv_Cout,6*Cv_Cout, (freqs//5+1,CV_Wf)) #Hout = freqs-4*(freqs//5+1)+4 = 35-32+4 = 7
 		self.conv5 = torch.nn.Conv2d(6*Cv_Cout,8*Cv_Cout, (freqs//5,CV_Wf)) #Hout = freqs-5*(freqs//5+1)+6 = 35-40+6 = 1; Wout = Win-5*Wf+5
 		
 		#shape(c5) = [batchsize,8*Cv_Cout,freqs-5*(freqs//5+1)+6,Win-5*Wf+5] = [batchsize,352,1,190]
@@ -39,17 +39,16 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 	def forward(self,data):
-		print(data.shape)
 		batchsize = data.shape[0]  if len(data.shape)>=3 else 1
 		nb_of_time = data.shape[1] if len(data.shape)>=3 else data.shape[0]
-		nce = data.shape[2]        if len(data.shape)>=3 else data.shape[1]
+		nce = self.nce
 		data = torch.reshape(data,[batchsize,nce,self.freqs,nb_of_time])
 		c1 = self.conv1(data)
 		c2 = self.conv2(c1)
 		c3 = self.conv3(c2)
 		c4 = self.conv4(c3)
 		c5 = self.conv5(c4)
-		c5 = torch.reshape(c,[c.shape[0],c.shape[3],c.shape[1]])
+		c5 = torch.reshape(c5,[c5.shape[0],c5.shape[3],c5.shape[1]])
 		l,mem = self.lstm(c5)
 		s = l[:,-1,:]
 		t = torch.reshape(s,[l.shape[0],1,l.shape[2]])

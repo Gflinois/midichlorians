@@ -55,11 +55,15 @@ def ProcessFile(cla=False, halt=False, fivef=False, PathToFiles = '.',nf = '', l
 				events.append([start, 0,j+1])
 				i+=1
 		events = sorted(events, key=lambda event: event[0])
+		
 		Ws = mne.time_frequency.morlet(sfreq, range(1,36))#generating the ws based on morlet for cwt for freqs of 1-35Hz
-		treated = mne.time_frequency.tfr.cwt(datas, Ws)
-		
-		
+
+		#treated = mne.time_frequency.tfr.cwt(datas, Ws)
+		#print(treated.shape)
+		#datas = treated.get_data()
 		raw = mne.io.RawArray(data = datas,info = info)
+		
+		
 		raw.set_channel_types(ch_types)
 		raw.add_events(events)
 		
@@ -67,6 +71,11 @@ def ProcessFile(cla=False, halt=False, fivef=False, PathToFiles = '.',nf = '', l
 			event_dict = {"nothing": 1, "LH": 2, "RH": 3, "O": 4}
 			epochs = mne.Epochs(raw, events, event_id=event_dict, tmin=-0.2, tmax=0.8, preload=True)
 			epochs.equalize_event_counts(["LH", "RH", "O", "nothing"]) 
+			
+			freqs = np.linspace(1,35,35)
+			n_cycles = freqs / 2.0
+			
+			epochs = epochs.compute_tfr(method = 'morlet',freqs =freqs, n_cycles=n_cycles ,picks = 'eeg',n_jobs=-1)
 			O_epochs = epochs["O"]
 			O_d = O_epochs.get_data(copy=True)
 			np.save(str(nfpath+'_O.npy'), O_d, allow_pickle=True)
@@ -74,15 +83,19 @@ def ProcessFile(cla=False, halt=False, fivef=False, PathToFiles = '.',nf = '', l
 		except:
 			event_dict = {"nothing": 1, "LH": 2, "RH": 3}
 			epochs = mne.Epochs(raw, events, event_id=event_dict, tmin=-0.2, tmax=0.8, preload=True)
+			freqs = np.linspace(1,35,35)
+			n_cycles = freqs / 2.0
+			
+			epochs = epochs.compute_tfr(method = 'morlet',freqs =freqs, n_cycles=n_cycles ,picks = 'eeg',n_jobs=-1)
 			O=False
 		LH_epochs = epochs["LH"]
 		RH_epochs = epochs["RH"]
 		nothing_epochs = epochs["nothing"]
-		RH_d = RH_epochs.get_data(copy=True)
+		RH_d = RH_epochs.get_data()
 		np.save(str(nfpath+'_RH.npy'), RH_d, allow_pickle=True)
-		LH_d = LH_epochs.get_data(copy=True)
+		LH_d = LH_epochs.get_data()
 		np.save(str(nfpath+'_LH.npy'), LH_d, allow_pickle=True)
-		nothing_d = nothing_epochs.get_data(copy=True)
+		nothing_d = nothing_epochs.get_data()
 		np.save(str(nfpath+'_nothing.npy'), nothing_d, allow_pickle=True)
 		print("loaded : ",fpath)
 		
