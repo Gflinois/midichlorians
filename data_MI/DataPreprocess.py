@@ -95,6 +95,15 @@ def ProcessFile(cla=False, halt=False, fivef=False, PathToFiles = '.',nf = '', l
 
 	return True
 
+def PlotHeatmap(self,data):
+	heatmap=data
+	import matplotlib
+	import matplotlib.pyplot as plt
+	cmap=matplotlib.cm.get_cmap("Reds")
+	plt.imshow(heatmap,cmap="Reds")
+	plt.show()
+		
+
 
 
 if __name__ == '__main__':
