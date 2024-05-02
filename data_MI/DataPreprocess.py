@@ -108,12 +108,13 @@ def ProcessFile(cla=False, halt=False, fivef=False, PathToFiles = '.',nf = '', l
 
 	return True
 
-def PlotHeatmap(self,data):
+def PlotHeatmap(data,vmax = 10**(-8)):
 	heatmap=data
 	import matplotlib
 	import matplotlib.pyplot as plt
 	cmap=matplotlib.cm.get_cmap("Reds")
-	plt.imshow(heatmap,cmap="Reds")
+	plt.imshow(heatmap,cmap="Reds",vmax =vmax)
+	cb = plt.colorbar()
 	plt.show()
 		
 

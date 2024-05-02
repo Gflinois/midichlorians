@@ -104,6 +104,8 @@ model= cwt_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",Batchsize
 model.eval()
 s=model.test_loop(Test)
 
+print("pred table =",model.pred_table)
+
 '''
 # this is for training test
 

@@ -1,7 +1,8 @@
 import torch
 import os
 import pytorch_lightning
-
+import numpy as np
+import mne
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
@@ -39,10 +40,15 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		
 	def forward(self,data):
+		#freqs = np.linspace(1,35,35)
+		#n_cycles = freqs / 2.0	
+		#data = torch.FloatTensor(mne.time_frequency.tfr_array_morlet(data = data.cpu(),sfreq = 200,freqs = freqs,n_cycles=n_cycles ,n_jobs=-1)).cuda()
+	
 		batchsize = data.shape[0]  if len(data.shape)>=3 else 1
 		nb_of_time = data.shape[1] if len(data.shape)>=3 else data.shape[0]
+		#nb_of_time = data.shape[3] if len(data.shape)>=3 else data.shape[0]
 		nce = self.nce
-		data = torch.reshape(data,[batchsize,nce,self.freqs,nb_of_time])
+		data = torch.reshape(data,[batchsize,nce,self.freqs,nb_of_time]).cuda()
 		c1 = self.conv1(data)
 		c2 = self.conv2(c1)
 		c3 = self.conv3(c2)
@@ -76,7 +82,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 	
 	def training_step(self,batch,batch_idx):
 		x,y = batch
-		y=torch.tensor(y,dtype=torch.float32)
+		y=torch.tensor(y,dtype=torch.float32).cuda()
 		r = self(x)
 		loss = torch.nn.functional.mse_loss(r, y)
 		self.log('train_loss', loss)
@@ -87,7 +93,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 
 	def validation_step(self, batch,batch_idx):
 		x,y = batch
-		y=torch.tensor(y,dtype=torch.float32)
+		y=torch.tensor(y,dtype=torch.float32).cuda()
 		r = self(x)
 		loss = torch.nn.functional.mse_loss(r, y)
 		
@@ -103,6 +109,7 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		with torch.no_grad():
 			for X, y in dataloader:
+				y=torch.tensor(y,dtype=torch.float32).cuda()
 				pred = self(X)
 				test_loss += torch.nn.functional.mse_loss(pred, y).item()
 				correct += int(pred.argmax()== y.argmax())
