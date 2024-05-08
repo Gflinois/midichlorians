@@ -1,0 +1,25 @@
+requête HTTP transmise, en attente de la réponse… 200 OK
+Taille : 1275936 (1,2M) [application/octet-stream]
+Enregistre : ‘physionet.org/files/eegmmidb/1.0.0/S053/S053R02.edf’
+
+
+
+2024-05-06 16:31:37 (156 KB/s) - ‘physionet.org/files/eegmmidb/1.0.0/S053/S053R02.edf’ enregistré [1275936/1275936]
+
+--2024-05-06 16:31:37--  https://physionet.org/files/eegmmidb/1.0.0/S053/S053R02.edf.event
+Réutilisation de la connexion existante à physionet.org:443.
+requête HTTP transmise, en attente de la réponse… 200 OK
+Taille : 38 [text/plain]
+Enregistre : ‘physionet.org/files/eegmmidb/1.0.0/S053/S053R02.edf.event’
+
+
+
+2024-05-06 16:31:37 (13,2 MB/s) - ‘physionet.org/files/eegmmidb/1.0.0/S053/S053R02.edf.event’ enregistré [38/38]
+
+--2024-05-06 16:31:37--  https://physionet.org/files/eegmmidb/1.0.0/S053/S053R03.edf
+Réutilisation de la connexion existante à physionet.org:443.
+requête HTTP transmise, en attente de la réponse… 200 OK
+Taille : 2555616 (2,4M) [application/octet-stream]
+Enregistre : ‘physionet.org/files/eegmmidb/1.0.0/S053/S053R03.edf’
+
+physionet.org/files/eegmmidb/1.0.0/S053/S053R03  19%[==================>                                                                                   ] 487,64K   154KB/s    tps 13s    physionet.org/files/eegmmidb/1.0.0/S053/S053R03  20%[====================>                                                                                 ] 519,64K   150KB/s    tps 13s    

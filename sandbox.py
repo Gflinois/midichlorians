@@ -88,7 +88,7 @@ except FileNotFoundError :
 checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
 trainer = pytorch_lightning.Trainer(
 	logger=True,
-	max_epochs=20,
+	max_epochs=200,
 	devices=1, accelerator="auto",
 	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 	)
