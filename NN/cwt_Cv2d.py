@@ -6,7 +6,7 @@ import mne
 
 
 class neur_net_struct(pytorch_lightning.LightningModule):
-	def __init__(self,Batchsize=1, freqs=35,Cv_Cout=44,CV_Wf=3, N_NEURONE=400, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=64):
+	def __init__(self,Batchsize=1, freqs=35,Cv_Cout=14,CV_Wf=3, N_NEURONE=150*8*14, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=64):
 		#def parametres
 		self.nce = nce #number of sensors
 		self.freqs = freqs
@@ -26,9 +26,6 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		
 		#shape(c5) = [batchsize,8*Cv_Cout,freqs-5*(freqs//5+1)+6,Win-5*Wf+5] = [batchsize,352,1,190]
 		
-		
-		self.lstm = torch.nn.LSTM(8*Cv_Cout, N_NEURONE, LSTM_LAYER, batch_first=True)
-		#inputsize = Co*Conv_size_out, hiddensize = nb features to extract at each time ste (we will use the last time step's feature to predict the class),num of lstms, 
 		self.drop = torch.nn.Dropout(DROPSIZE)
 		self.Big = torch.nn.Linear( N_NEURONE,  N_NEURONE//2)
 		self.drop1 = torch.nn.Dropout(DROPSIZE)
@@ -54,11 +51,10 @@ class neur_net_struct(pytorch_lightning.LightningModule):
 		c4 = self.conv4(c3)
 		c5 = self.conv5(c4)
 		c5 = c5.moveaxis((1,3),(2,1)).squeeze()
-		print(c5.size())
-		l,mem = self.lstm(c5)
-		s = l[:,-1,:] if len(l.shape)>=3 else l[-1,:]
-		#m = torch.nn.functional.relu(t)
-		b = self.Big(s)
+		#150*352
+		m = c5.reshape(batchsize, 150*8*14, 1).squeeze()
+		m = torch.nn.functional.relu(m)
+		b = self.Big(m)
 		i = self.Inter(b)
 		f = self.Fin(i)
 		

@@ -14,6 +14,7 @@ sys.path.insert(2,"./data_MI")
 import Sig_Cv2d_Lstm
 import Snap_Cv2d
 import cwt_Cv2d_Lstm
+import cwt_Cv2d
 from DataInRam import DataInRam
 from translator import translator
 
@@ -37,8 +38,9 @@ class MetricsCallback(pytorch_lightning.Callback):
 
 
 
-l_chan =(True,range(22))
+
 """
+l_chan =(True,range(64))
 epochs = DataInRam(CLA=True,PathToFiles="./data_MI",datatype="", precutting=False, MNE=True, l_chan=l_chan)
 e = epochs["CLA"]
 #epochs = mne.concatenate_epochs(e)
@@ -67,8 +69,8 @@ LH_evoked.plot_topomap(times=[0.0, 0.08, 0.1, 0.12, 0.2,0.3], ch_type="eeg")
 """
 #make use of the new data loader of dataloaders
 
+dd=DataInRam(PathToFiles = './data_MI')
 
-dd=DataInRam(CLA =True,PathToFiles = './data_MI')
 Train = dd["CLA"]["Train"]
 Val = dd["CLA"]["Validation"]
 Test = dd["CLA"]["Test"]
@@ -78,20 +80,27 @@ print(len(Train)," training batches")
 
 
 #training with the new nn
-model = nncwt = cwt_Cv2d_Lstm.neur_net_struct(Batchsize=1, freqs=35,Cv_Cout=44,CV_Wf=3, N_NEURONE=600, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=22)
+model = nncwt = cwt_Cv2d.neur_net_struct()
 
-
+"""
 try :
 	shutil.rmtree("lightning_logs")
 except FileNotFoundError :
 	print("File not suppressed")
 checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')
+
 trainer = pytorch_lightning.Trainer(
 	logger=True,
-	max_epochs=200,
+	max_epochs=10,
 	devices=1, accelerator="auto",
 	callbacks=[pytorch_lightning.callbacks.LearningRateMonitor(logging_interval='step'), MetricsCallback(), pytorch_lightning.callbacks.ModelCheckpoint(monitor="val_loss",mode='min')]
 	)
+"""
+trainer = pytorch_lightning.Trainer(
+	logger=True,
+	max_epochs=10,
+	devices=1, accelerator="auto",
+)
 trainer.fit(model,Train, Val)
 
 
@@ -99,9 +108,10 @@ fle = os.listdir("lightning_logs/version_0/checkpoints")[0]
 shutil.copyfile("lightning_logs/version_0/checkpoints/" + fle, "model.ckpt")
 
 
-model= cwt_Cv2d_Lstm.neur_net_struct.load_from_checkpoint("model.ckpt",Batchsize=1, freqs=35,Cv_Cout=44,CV_Wf=3, N_NEURONE=600, LSTM_LAYER=2, DROPSIZE=0,Numb_Of_Class=4,nce=22)
+#model= cwt_Cv2d.neur_net_struct.load_from_checkpoint()
 
 model.eval()
+print(model.cuda())
 s=model.test_loop(Test)
 
 print("pred table =",model.pred_table)
